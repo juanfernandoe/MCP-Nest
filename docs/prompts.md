@@ -208,6 +208,40 @@ getTaskPlannerPrompt(@Payload() { task, complexity }: { task: string; complexity
 }
 ```
 
+## Prompt with a Swagger DTO
+
+Instead of a Zod object, `parameters` also accepts an `@nestjs/swagger` DTO class (optional peer dependency, 11.3.0 or newer). Each documented property becomes a prompt argument: its `description` is advertised, and it is required unless declared optional.
+
+```typescript
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+class ReviewDto {
+  @ApiProperty({ description: 'The code to review' })
+  code: string;
+
+  @ApiPropertyOptional({ description: 'What to focus on' })
+  focus?: string;
+}
+
+@Prompt({
+  name: 'review',
+  description: 'Review a piece of code',
+  parameters: ReviewDto,
+})
+getReviewPrompt(@Payload() { code, focus }: ReviewDto) {
+  return {
+    messages: [
+      {
+        role: 'user',
+        content: { type: 'text', text: `Review (${focus ?? 'everything'}): ${code}` },
+      },
+    ],
+  };
+}
+```
+
+See [Tool with Swagger DTOs](tools.md#tool-with-swagger-dtos) for how a DTO is read.
+
 ## Testing Your Prompts
 
 ### 1. Start the Server

@@ -10,6 +10,7 @@
     "@nestjs/core": "^11.0.0",
     "@nestjs/microservices": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/swagger": "^11.3.0",
     "@rekog/mcp-nest": "file:../../packages/mcp-nest",
     "arktype": "^2.1.0",
     "class-transformer": "^0.5.1",

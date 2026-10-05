@@ -50,7 +50,7 @@ npm install @rekog/mcp-nest \
 | MCP SDK | `@modelcontextprotocol/sdk@>=1.10.0` | `@modelcontextprotocol/{core,node,server}` — **v2, `2.0.0-beta.5` minimum** |
 | Nest microservices | not used | `@nestjs/microservices` — **required**, it's how the strategy attaches |
 | OAuth server | bundled in `@rekog/mcp-nest` | separate package `@rekog/mcp-nest-auth` |
-| `zod` | `^4` | `^4` (unchanged; and `parameters` now also accepts any Standard Schema or raw JSON Schema) |
+| `zod` | `^4` | `^4` (unchanged; and `parameters` now also accepts any Standard Schema, an `@nestjs/swagger` DTO class or raw JSON Schema) |
 | `express` / `@nestjs/platform-fastify` | peer / optional peer | unchanged |
 
 **`2.0.0-beta.5` is the minimum SDK version.** It is the first release matching
@@ -338,6 +338,10 @@ class UserTools {
 Install `class-validator` + `class-transformer` and ensure `emitDecoratorMetadata`
 is enabled in `tsconfig.json`. A constraint violation returns
 `{ isError: true }` with the `Validation failed: ...` message.
+
+If the DTO is also documented with `@nestjs/swagger`, you can pass the class
+itself as `parameters` and drop the Zod schema — see
+[Tool with Swagger DTOs](tools.md#tool-with-swagger-dtos).
 
 ## 4. Transports
 

@@ -10,6 +10,7 @@ import { GreetingTool } from './greeting.tool';
 import { ErrorTool } from './error.tool';
 import { FilteredService } from './filters';
 import { ArkTypeTool } from './arktype.tool';
+import { SwaggerTool } from './swagger.tool';
 
 // Stateful so progress reporting and elicitation (session-aware) work.
 // `capabilities: { logging: {} }` is required for ctx.log.* to actually reach
@@ -23,7 +24,13 @@ const mcp = new McpStrategy({
 });
 
 @Module({
-  controllers: [GreetingTool, ErrorTool, FilteredService, ArkTypeTool],
+  controllers: [
+    GreetingTool,
+    ErrorTool,
+    FilteredService,
+    ArkTypeTool,
+    SwaggerTool,
+  ],
   providers: [{ provide: MCP_STRATEGY, useValue: mcp }],
 })
 class AppModule {}

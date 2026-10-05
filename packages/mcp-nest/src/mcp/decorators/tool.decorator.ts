@@ -1,4 +1,4 @@
-import { applyDecorators, SetMetadata } from '@nestjs/common';
+import { applyDecorators, SetMetadata, type Type } from '@nestjs/common';
 import { z } from 'zod';
 import {
   ToolAnnotations as SdkToolAnnotations,
@@ -14,10 +14,15 @@ import { mcpMessagePattern } from './mcp-message-pattern';
  * Standard Schema validator that also carries a JSON Schema (e.g. Zod 4.2+,
  * ArkType 2.1+, or Valibot wrapped with `@valibot/to-json-schema`'s
  * `toStandardJsonSchema`) is now accepted, as is a raw JSON Schema object.
+ *
+ * A class is read as an `@nestjs/swagger` DTO: its `@ApiProperty()` metadata
+ * becomes the JSON Schema, which is also what the value is validated against.
+ * This needs the optional peer dependency `@nestjs/swagger` (>=11.3.0).
  */
 export type ToolInputSchema =
   | z.ZodType
   | StandardSchemaV1
+  | Type<unknown>
   | Record<string, unknown>;
 
 /**
@@ -67,8 +72,8 @@ export interface ToolOptions {
  * @param {Object} options - The options for the decorator
  * @param {string} options.name - The name of the tool
  * @param {string} options.description - The description of the tool
- * @param {z.ZodType} [options.parameters] - The parameters of the tool
- * @param {z.ZodType} [options.outputSchema] - The output schema of the tool
+ * @param {ToolInputSchema} [options.parameters] - The parameters of the tool
+ * @param {ToolInputSchema} [options.outputSchema] - The output schema of the tool
  * @returns {MethodDecorator} - The decorator
  */
 export const Tool = (options: ToolOptions) => {

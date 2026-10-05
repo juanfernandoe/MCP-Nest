@@ -52,6 +52,9 @@ Do not read `LATEST_PROTOCOL_VERSION` from the SDK as "the newest revision we sp
   `requestState.verify` hook and `inputRequired` shim knobs are `McpServerOptions`. Works on both
   eras (the SDK shim converts on legacy). See `docs/mrtr.md`.
 - Tool `parameters` accept any Standard Schema, not just Zod (`zod` is not a core dependency).
+- A class passed as a tool/prompt schema is read as an `@nestjs/swagger` DTO (optional peer,
+  `>=11.3.0`, `require`d lazily). Its OpenAPI 3.0 schema is converted to JSON Schema 2020-12 in
+  `transport/swagger-schema.ts` and validated like a raw JSON Schema, not with class-validator.
 - `jest.config.js` at the root is a dead leftover; tests run under `bun test`.
 - The only root lockfile is `package-lock.json` (CI uses `npm ci`). Do not add a root `bun.lock`.
 - Releases: create a GitHub release `vX.Y.Z` → `publish.yml`. Security patches release

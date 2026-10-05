@@ -3,6 +3,7 @@ import { z } from 'zod';
 import * as v from 'valibot';
 import { toStandardJsonSchema } from '@valibot/to-json-schema';
 import { type } from 'arktype';
+import { ApiProperty } from '@nestjs/swagger';
 import {
   assertNoMcpParamHeaderMirroring,
   resolveToolSchema,
@@ -195,6 +196,16 @@ describe('assertNoMcpParamHeaderMirroring', () => {
         "@Tool({ name: 'search' })",
       ),
     ).toThrow(/x-mcp-header/);
+  });
+
+  it('rejects an @nestjs/swagger DTO that smuggles it in through @ApiProperty()', () => {
+    class SearchDto {
+      @ApiProperty({ 'x-mcp-header': true } as any)
+      q!: string;
+    }
+    expect(() =>
+      assertNoMcpParamHeaderMirroring(SearchDto, "@Tool({ name: 'search' })"),
+    ).toThrow(/\/properties\/q\/x-mcp-header/);
   });
 
   it('rejects it outside the statically reachable properties chain too', () => {

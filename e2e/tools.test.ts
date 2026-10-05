@@ -69,6 +69,7 @@ describe.each(ERAS)('examples/tools e2e (%s era)', (era) => {
         'my-tool',
         'process-data',
         'secure-action',
+        'swagger-create-task',
         'throw-plain',
         'throw-rpc',
         'whoami',
@@ -178,6 +179,41 @@ describe.each(ERAS)('examples/tools e2e (%s era)', (era) => {
 
     test('invalid call -> ArkType validation rejects server-side', async () => {
       const res: any = await client().callTool({ name: 'arktype-add', arguments: { a: 'nope', b: 3 } });
+      expect(res.isError).toBe(true);
+      expect(text(res)).toContain('Invalid parameters');
+    });
+  });
+
+  // Proves an @nestjs/swagger DTO class drives a tool end-to-end with no Zod
+  // schema: its @ApiProperty() metadata reaches tools/list as JSON Schema, and
+  // that schema validates tools/call server-side.
+  describe('@nestjs/swagger DTO tool', () => {
+    test('inputSchema emission (DTO class -> JSON Schema on the wire)', async () => {
+      const { tools } = await client().listTools();
+      const t: any = tools.find((x) => x.name === 'swagger-create-task');
+      expect(t.inputSchema.type).toBe('object');
+      expect(t.inputSchema.properties.title).toEqual({
+        type: 'string',
+        description: 'What needs doing',
+        minLength: 3,
+      });
+      expect(t.inputSchema.required).toEqual(['title']);
+    });
+
+    test('valid call -> DTO-validated structuredContent', async () => {
+      const res: any = await client().callToolWire({
+        name: 'swagger-create-task',
+        arguments: { title: 'Write docs', priority: 'high' },
+      });
+      expect(res.structuredContent).toEqual({
+        id: 'task-1',
+        title: 'Write docs',
+        priority: 'high',
+      });
+    });
+
+    test('invalid call -> @ApiProperty() constraint rejects server-side', async () => {
+      const res: any = await client().callTool({ name: 'swagger-create-task', arguments: { title: 'x' } });
       expect(res.isError).toBe(true);
       expect(text(res)).toContain('Invalid parameters');
     });

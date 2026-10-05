@@ -1,6 +1,5 @@
-import { ZodObject } from 'zod';
 import type { McpContext } from '../transport/mcp-context';
-import type { PromptArgsRawShape } from '../decorators/prompt.decorator';
+import type { PromptArgsSchema } from '../decorators/prompt.decorator';
 
 export type DynamicPromptHandler = (
   args: Record<string, string> | undefined,
@@ -13,8 +12,8 @@ export interface DynamicPromptDefinition {
   name: string;
   /** Description shown to the LLM */
   description: string;
-  /** Zod schema describing the prompt arguments */
-  parameters?: ZodObject<PromptArgsRawShape>;
+  /** Zod object or `@nestjs/swagger` DTO class describing the prompt arguments */
+  parameters?: PromptArgsSchema;
   /** Handler function that returns the prompt messages */
   handler: DynamicPromptHandler;
 }

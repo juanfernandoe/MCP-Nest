@@ -83,6 +83,7 @@
     "hono": "^4.13.7",
     "brace-expansion@^1": "^1.1.18",
     "minimatch@^3": "^3.1.5",
+    "js-yaml@^5": "^5.4.2",
     "multer": "^2.3.0",
     "fastify": "^5.12.4"
   }

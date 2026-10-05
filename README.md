@@ -21,6 +21,7 @@ With `@rekog/mcp-nest` you define tools, resources, and prompts in a way that's 
 - 🚀 **[Multi-Transport Support](docs/server-examples.md#multiple-transport-types)**: Streamable HTTP and STDIO — selected via the `transports` array
 - 🕰️ **[Dual-Era Protocol Support](docs/protocol-revisions.md)**: One endpoint serves both the 2025-era protocol (`initialize` + sessions) and the stateless `2026-07-28` revision, concurrently — with **no change to your tool code**
 - 🔧 **[Tools](docs/tools.md)**: Expose NestJS methods as MCP tools with automatic discovery and Zod validation
+  - 📐 **[Swagger DTOs](docs/tools.md#tool-with-swagger-dtos)**: Describe tools with your existing `@nestjs/swagger` DTO classes instead of Zod
   - 🛠️ **[Elicitation](docs/tools.md#interactive-tool-with-elicitation)**: Interactive tool calls with user input elicitation
   - 🔁 **[Multi Round-Trip Requests](docs/mrtr.md)**: Elicitation, sampling and roots on protocol revision `2026-07-28` — one handler serves both eras
   - 🌐 **[HTTP Request Access](docs/tools.md#understanding-tool-method-parameters)**: Full access to request context within MCP handlers
@@ -63,6 +64,12 @@ If you additionally use the TypeORM store for the authorization server, install 
 
 ```bash
 npm install @nestjs/typeorm typeorm
+```
+
+To describe tools with [`@nestjs/swagger` DTO classes](docs/tools.md#tool-with-swagger-dtos) instead of Zod schemas, install `@nestjs/swagger` (11.3.0 or newer):
+
+```bash
+npm install @nestjs/swagger
 ```
 
 ## Quick Start

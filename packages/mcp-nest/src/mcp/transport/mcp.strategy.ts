@@ -24,6 +24,7 @@ import {
   resolveToolSchema,
 } from './tool-schema';
 import type { ToolInputSchema } from '../decorators/tool.decorator';
+import { swaggerDtoToJsonSchema } from './swagger-schema';
 
 import {
   MCP_PROMPT_METADATA_KEY,
@@ -831,15 +832,7 @@ export class McpStrategy extends Server implements CustomTransportStrategy {
       prompts: this.getPrompts().map((prompt) => ({
         name: prompt.metadata.name,
         description: prompt.metadata.description,
-        arguments: prompt.metadata.parameters
-          ? Object.entries(prompt.metadata.parameters.shape).map(
-              ([name, field]): PromptArgument => ({
-                name,
-                description: field.description,
-                required: !field.isOptional(),
-              }),
-            )
-          : [],
+        arguments: this.listPromptArguments(prompt.metadata.parameters),
       })),
     }));
 
@@ -866,6 +859,28 @@ export class McpStrategy extends Server implements CustomTransportStrategy {
         ctx,
       )) as GetPromptResult;
     });
+  }
+
+  private listPromptArguments(
+    parameters: PromptMetadata['parameters'],
+  ): PromptArgument[] {
+    if (!parameters) return [];
+    if (typeof parameters === 'function') {
+      const schema = swaggerDtoToJsonSchema(parameters);
+      const required = (schema.required ?? []) as string[];
+      return Object.entries(
+        schema.properties as Record<string, { description?: string }>,
+      ).map(([name, property]) => ({
+        name,
+        description: property.description,
+        required: required.includes(name),
+      }));
+    }
+    return Object.entries(parameters.shape).map(([name, field]) => ({
+      name,
+      description: field.description,
+      required: !field.isOptional(),
+    }));
   }
 
   // ---------------------------------------------------------------------------

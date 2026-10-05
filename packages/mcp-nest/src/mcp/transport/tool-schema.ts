@@ -4,7 +4,9 @@ import {
   type JsonSchemaType,
   type StandardSchemaV1,
 } from '@modelcontextprotocol/server';
+import type { Type } from '@nestjs/common';
 import type { ToolInputSchema } from '../decorators/tool.decorator';
+import { swaggerDtoToJsonSchema } from './swagger-schema';
 
 /**
  * A tool schema resolved to the two things the MCP transport needs from it:
@@ -198,6 +200,17 @@ function resolveRawJsonSchema(
 }
 
 // -----------------------------------------------------------------------------
+// @nestjs/swagger DTO class (case 4) — converted to JSON Schema, then as case 3.
+// -----------------------------------------------------------------------------
+
+function resolveSwaggerDto(dto: Type<unknown>): ResolvedToolSchema {
+  // The class only *describes* its shape (`@ApiProperty`), so it is validated
+  // the way a hand-written JSON Schema is. Rules that live in class-validator
+  // decorators are a `ValidationPipe`'s job, as on any other Nest handler.
+  return resolveRawJsonSchema(swaggerDtoToJsonSchema(dto));
+}
+
+// -----------------------------------------------------------------------------
 // SEP-2243 header mirroring (`x-mcp-header`) — refused, loudly.
 // -----------------------------------------------------------------------------
 
@@ -260,7 +273,8 @@ function findMcpHeaderAnnotation(
  *
  * A hard error at registration turns that silent spec violation into an obvious
  * one. Nothing else in mcp-nest emits the annotation, so this can only fire on a
- * schema a user authored by hand (a raw JSON Schema object, or Zod `.meta()`).
+ * schema a user authored by hand (a raw JSON Schema object, Zod `.meta()`, or
+ * an extension key on `@ApiProperty()`).
  *
  * @param schema the tool's declared `parameters`
  * @param toolLabel how to name the offending tool in the error
@@ -298,7 +312,7 @@ export function assertNoMcpParamHeaderMirroring(
 /**
  * Classify a tool schema and return the JSON-Schema/validate pair the transport
  * needs. Classification order: Zod, then any Standard Schema (`~standard`), then
- * a plain JSON Schema object.
+ * an `@nestjs/swagger` DTO class, then a plain JSON Schema object.
  */
 export function resolveToolSchema(schema: ToolInputSchema): ResolvedToolSchema {
   if (schema instanceof z.ZodType) {
@@ -307,11 +321,16 @@ export function resolveToolSchema(schema: ToolInputSchema): ResolvedToolSchema {
   if (hasStandard(schema)) {
     return resolveStandard(schema);
   }
+  // After the Standard Schema check: ArkType schemas are functions too.
+  if (typeof schema === 'function') {
+    return resolveSwaggerDto(schema as Type<unknown>);
+  }
   if (isPlainObject(schema)) {
     return resolveRawJsonSchema(schema);
   }
   throw new Error(
     'Unsupported tool schema: expected a Zod schema, a Standard Schema ' +
-      'validator (with ~standard), or a raw JSON Schema object.',
+      'validator (with ~standard), an @nestjs/swagger DTO class, or a raw ' +
+      'JSON Schema object.',
   );
 }
